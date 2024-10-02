@@ -1,0 +1,559 @@
+1. Database
+buat database dengan nama psb_db
+
+CREATE DATABASE psb_db;
+
+USE psb_db;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'user') NOT NULL
+);
+
+CREATE TABLE form (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    nama_lengkap VARCHAR(100) NOT NULL,
+    asal_sekolah VARCHAR(100) NOT NULL,
+    tempat_lahir VARCHAR(50) NOT NULL,
+    tanggal_lahir DATE NOT NULL,
+    jk ENUM('Laki-laki', 'Perempuan') NOT NULL,
+    alamat TEXT NOT NULL,
+    nomor_telepon VARCHAR(15) NOT NULL,
+    agama VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    program_studi VARCHAR(100) NOT NULL,
+    status ENUM('Diterima', 'Cadangan', 'Tidak Diterima') DEFAULT 'Cadangan',
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+File index.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSB Online</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>Selamat Datang di PSB Online</h1>
+    <a href="login.html">Login</a> | <a href="register.html">Daftar</a>
+</body>
+</html>
+
+
+File login.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>Login</h1>
+    <form action="process_login.php" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+
+
+File register.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>Daftar</h1>
+    <form action="process_register.php" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <button type="submit">Daftar</button>
+    </form>
+</body>
+</html>
+
+
+File process_register.php
+
+<?php
+require 'config.php';
+
+$username = $_POST['username'];
+$password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+
+$sql = "INSERT INTO users (username, password, role) VALUES ('$username', '$password', 'user')";
+
+if (mysqli_query($conn, $sql)) {
+    header('Location: login.html');
+} else {
+    echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+}
+
+mysqli_close($conn);
+?>
+
+
+File process_login.php
+
+<?php
+session_start();
+
+require 'config.php';
+
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$sql = "SELECT * FROM users WHERE username = '$username'";
+$result = mysqli_query($conn, $sql);
+
+if (mysqli_num_rows($result) > 0) {
+    $user = mysqli_fetch_assoc($result);
+    if (password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $username;
+        $_SESSION['role'] = $user['role'];
+        header('Location: home.php');
+        exit();
+    } else {
+        $error = "Password salah";
+    }
+} else {
+    $error = "Username tidak ditemukan";
+}
+
+mysqli_close($conn);
+
+if (isset($error)) {
+    header("Location: login.html?error=" . urlencode($error));
+    exit();
+}
+?>
+
+
+File home.php
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beranda</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>Selamat Datang, <?php echo htmlspecialchars($username); ?>!</h1>
+    <a href="logout.php">Logout</a>
+
+    <?php if ($role == 'admin'): ?>
+        <h2>Halaman Beranda Admin</h2>
+        <a href="form.php">Formulir Pendaftaran</a><br>
+        <a href="data.php">Data Pendaftaran</a>
+    <?php else: ?>
+        <h2>Halaman Beranda Pengguna</h2>
+        <a href="form.php">Formulir Pendaftaran</a><br>
+        <a href="data.php">Data Pendaftaran Saya</a>
+    <?php endif; ?>
+</body>
+</html>
+
+
+File form.php
+
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Pendaftaran</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>Formulir Pendaftaran</h1>
+    <form action="process_form.php" method="post">
+        <label for="name">Nama:</label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="school_origin">Asal Sekolah:</label>
+        <input type="text" id="school_origin" name="school_origin" required><br>
+        <label for="place_of_birth">Tempat Lahir:</label>
+        <input type="text" id="place_of_birth" name="place_of_birth" required><br>
+        <label for="date_of_birth">Tanggal Lahir:</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" required><br>
+        <label for="gender">Jenis Kelamin:</label>
+        <select id="gender" name="gender" required>
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
+        </select><br>
+        <label for="address">Alamat:</label>
+        <textarea id="address" name="address" required></textarea><br>
+        <label for="phone_number">Nomor Telepon:</label>
+        <input type="text" id="phone_number" name="phone_number" required><br>
+        <label for="religion">Agama:</label>
+        <input type="text" id="religion" name="religion" required><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+        <label for="chosen_program">Program Studi Pilihan:</label>
+        <input type="text" id="chosen_program" name="chosen_program" required><br>
+        <button type="submit">Daftar</button>
+    </form>
+</body>
+</html>
+
+
+File data.php
+
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pendaftaran</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>Data Pendaftaran</h1>
+    <a href="home.php">Kembali ke Beranda</a><br><br>
+
+    <?php if ($role == 'admin'): ?>
+        <h2>Daftar Semua Pendaftar</h2>
+        <?php
+        $result = mysqli_query($conn, "SELECT * FROM students");
+        if (mysqli_num_rows($result) > 0) {
+            echo "<table border='1'>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Asal Sekolah</th>
+                        <th>Tempat Lahir</th>
+                        <th>Tanggal Lahir</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Alamat</th>
+                        <th>Nomor Telepon</th>
+                        <th>Agama</th>
+                        <th>Email</th>
+                        <th>Program Studi Pilihan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>";
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo "<tr>
+                        <td>{$row['name']}</td>
+                        <td>{$row['school_origin']}</td>
+                        <td>{$row['place_of_birth']}</td>
+                        <td>{$row['date_of_birth']}</td>
+                        <td>{$row['gender']}</td>
+                        <td>{$row['address']}</td>
+                        <td>{$row['phone_number']}</td>
+                        <td>{$row['religion']}</td>
+                        <td>{$row['email']}</td>
+                        <td>{$row['chosen_program']}</td>
+                        <td>{$row['status']}</td>
+                        <td><a href='edit.php?id={$row['id']}'>Edit</a> | <a href='delete.php?id={$row['id']}'>Hapus</a></td>
+                    </tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "Tidak ada data pendaftar.";
+        }
+        ?>
+    <?php else: ?>
+        <h2>Data Pendaftaran Saya</h2>
+        <?php
+        $result = mysqli_query($conn, "SELECT * FROM students WHERE email = '$username'");
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo "Nama: {$row['name']}<br>
+                      Asal Sekolah: {$row['school_origin']}<br>
+                      Tempat Lahir: {$row['place_of_birth']}<br>
+                      Tanggal Lahir: {$row['date_of_birth']}<br>
+                      Jenis Kelamin: {$row['gender']}<br>
+                      Alamat: {$row['address']}<br>
+                      Nomor Telepon: {$row['phone_number']}<br>
+                      Agama: {$row['religion']}<br>
+                      Email: {$row['email']}<br>
+                      Program Studi Pilihan: {$row['chosen_program']}<br>
+                      Status: {$row['status']}<br>";
+            }
+        } else {
+            echo "Tidak ada data pendaftar.";
+        }
+        ?>
+    <?php endif; ?>
+</body>
+</html>
+
+
+File process_form.php
+
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+$name = $_POST['name'];
+$school_origin = $_POST['school_origin'];
+$place_of_birth = $_POST['place_of_birth'];
+$date_of_birth = $_POST['date_of_birth'];
+$gender = $_POST['gender'];
+$address = $_POST['address'];
+$phone_number = $_POST['phone_number'];
+$religion = $_POST['religion'];
+$email = $_POST['email'];
+$chosen_program = $_POST['chosen_program'];
+
+$result = mysqli_query($conn, "INSERT INTO students (name, school_origin, place_of_birth, date_of_birth, gender, address, phone_number, religion, email, chosen_program) VALUES ('$name', '$school_origin', '$place_of_birth', '$date_of_birth', '$gender', '$address', '$phone_number', '$religion', '$email', '$chosen_program')");
+if ($result) {
+    header('Location: data.php');
+    exit();
+} else {
+    echo "Gagal mendaftar.";
+}
+?>
+
+
+File logout.php
+
+<?php
+session_start();
+session_destroy();
+header('Location: login.html');
+exit();
+?>
+
+
+File config.php
+
+<?php
+$conn = mysqli_connect("localhost", "root", "", "psb_db");
+
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
+}
+?>
+
+
+File edit.php
+
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+if ($role != 'admin') {
+    header('Location: home.php');
+    exit();
+}
+
+$id = $_GET['id'];
+
+$result = mysqli_query($conn, "SELECT * FROM students WHERE id = '$id'");
+if (mysqli_num_rows($result) > 0) {
+    $row = mysqli_fetch_assoc($result);
+} else {
+    header('Location: data.php');
+    exit();
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Data Pendaftar</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>Edit Data Pendaftar</h1>
+    <a href="data.php">Kembali ke Data Pendaftar</a><br><br>
+
+    <form action="process_edit.php" method="post">
+        <input type="hidden" name="id" value="<?php echo $id; ?>">
+        <label for="name">Nama:</label>
+        <input type="text" id="name" name="name" value="<?php echo $row['name']; ?>" required><br>
+        <label for="school_origin">Asal Sekolah:</label>
+        <input type="text" id="school_origin" name="school_origin" value="<?php echo $row['school_origin']; ?>" required><br>
+        <label for="place_of_birth">Tempat Lahir:</label>
+        <input type="text" id="place_of_birth" name="place_of_birth" value="<?php echo $row['place_of_birth']; ?>" required><br>
+        <label for="date_of_birth">Tanggal Lahir:</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" value="<?php echo $row['date_of_birth']; ?>" required><br>
+        <label for="gender">Jenis Kelamin:</label>
+        <select id="gender" name="gender" required>
+            <option value="Laki-laki" <?php if ($row['gender'] == 'Laki-laki') echo 'selected'; ?>>Laki-laki</option>
+            <option value="Perempuan" <?php if ($row['gender'] == 'Perempuan') echo 'selected'; ?>>Perempuan</option>
+        </select><br>
+        <label for="address">Alamat:</label>
+        <textarea id="address" name="address" required><?php echo $row['address']; ?></textarea><br>
+        <label for="phone_number">Nomor Telepon:</label>
+        <input type="text" id="phone_number" name="phone_number" value="<?php echo $row['phone_number']; ?>" required><br>
+        for="religion">Agama:</label>
+        <input type="text" id="religion" name="religion" value="<?php echo $row['religion']; ?>" required><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="<?php echo $row['email']; ?>" required><br>
+        <label for="chosen_program">Program Studi Pilihan:</label>
+        <input type="text" id="chosen_program" name="chosen_program" value="<?php echo $row['chosen_program']; ?>" required><br>
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="Diterima" <?php if ($row['status'] == 'Diterima') echo 'selected'; ?>>Diterima</option>
+            <option value="Ditolak" <?php if ($row['status'] == 'Ditolak') echo 'selected'; ?>>Ditolak</option>
+            <option value="Proses" <?php if ($row['status'] == 'Proses') echo 'selected'; ?>>Proses</option>
+        </select><br>
+        <button type="submit">Simpan Perubahan</button>
+    </form>
+</body>
+</html>
+
+
+File delete.php
+
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+if ($role != 'admin') {
+    header('Location: home.php');
+    exit();
+}
+
+$id = $_GET['id'];
+
+$result = mysqli_query($conn, "DELETE FROM students WHERE id = '$id'");
+if ($result) {
+    header('Location: data.php');
+    exit();
+} else {
+    echo "Gagal menghapus data.";
+}
+?>
+
+
+File process_edit.php
+
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+if ($role != 'admin') {
+    header('Location: home.php');
+    exit();
+}
+
+$id = $_POST['id'];
+$name = $_POST['name'];
+$school_origin = $_POST['school_origin'];
+$place_of_birth = $_POST['place_of_birth'];
+$date_of_birth = $_POST['date_of_birth'];
+$gender = $_POST['gender'];
+$address = $_POST['address'];
+$phone_number = $_POST['phone_number'];
+$religion = $_POST['religion'];
+$email = $_POST['email'];
+$chosen_program = $_POST['chosen_program'];
+$status = $_POST['status'];
+
+$result = mysqli_query($conn, "UPDATE students SET name = '$name', school_origin = '$school_origin', place_of_birth = '$place_of_birth', date_of_birth = '$date_of_birth', gender = '$gender', address = '$address', phone_number = '$phone_number', religion = '$religion', email = '$email', chosen_program = '$chosen_program', status = '$status' WHERE id = '$id'");
+if ($result) {
+    header('Location: data.php');
+    exit();
+} else {
+    echo "Gagal mengedit data.";
+}
+?>
+
+
