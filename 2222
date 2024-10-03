@@ -1,0 +1,43 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'database.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+if (!isset($_SESSION['user_id'])) {
+    die("User  ID tidak ditemukan dalam sesi.");
+}
+
+$user_id = $_SESSION['user_id'];
+$name = $_POST['nama_lengkap'];
+$school_origin = $_POST['asal_sekolah'];
+$place_of_birth = $_POST['tempat_lahir'];
+$date_of_birth = $_POST['tanggal_lahir'];
+$gender = $_POST['jk'];
+$address = $_POST['alamat'];
+$phone_number = $_POST['nomor_telepon'];
+$religion = $_POST['agama'];
+$email = $_POST['email'];
+$chosen_program = $_POST['program_studi'];
+
+// Pastikan semua kolom yang diperlukan ada dalam query
+$sql = "INSERT INTO form (user_id, nama_lengkap, asal_sekolah, tempat_lahir, tanggal_lahir, jk, alamat, nomor_telepon, agama, email, program_studi) VALUES ('$user_id', '$name', '$school_origin', '$place_of_birth', '$date_of_birth', '$gender', '$address', '$phone_number', '$religion', '$email', '$chosen_program')";
+
+$result = mysqli_query($conn, $sql);
+
+if ($result) {
+    header('Location: data.php');
+    exit();
+} else {
+    echo "Error: " . mysqli_error($conn);
+}
+
+mysqli_close($conn);
+?>
