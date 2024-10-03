@@ -1,4 +1,46 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.html');
+    exit();
+}
+
+require 'config.php';
+
+$user_id = $_SESSION['user_id']; // Pastikan Anda menyimpan user_id saat login
+$name = $_POST['name'];
+$school_origin = $_POST['school_origin'];
+$place_of_birth = $_POST['place_of_birth'];
+$date_of_birth = $_POST['date_of_birth'];
+$gender = $_POST['gender'];
+$address = $_POST['address'];
+$phone_number = $_POST['phone_number'];
+$religion = $_POST['religion'];
+$email = $_POST['email'];
+$chosen_program = $_POST['chosen_program'];
+
+// Validasi data sebelum memasukkan ke database
+if (empty($name) || empty($school_origin) || empty($place_of_birth) || empty($date_of_birth) || empty($gender) || empty($address) || empty($phone_number) || empty($religion) || empty($email) || empty($chosen_program)) {
+    header('Location: form.php?error=Lengkapi semua data');
+    exit();
+}
+
+$sql = "INSERT INTO students (user_id, name, school_origin, place_of_birth, date_of_birth, gender, address, phone_number, religion, email, chosen_program) VALUES ('$user_id', '$name', '$school_origin', '$place_of_birth', '$date_of_birth', '$gender', '$address', '$phone_number', '$religion', '$email', '$chosen_program')";
+
+if (mysqli_query($conn, $sql)) {
+    header('Location: data.php?success=Pendaftaran berhasil');
+} else {
+    header('Location: form.php?error=Gagal mendaftar');
+}
+
+mysqli_close($conn);
+?>
+
+
+
+
+<?php
 require 'config.php';
 
 $name = $_POST['name'];
