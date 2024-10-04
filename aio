@@ -174,18 +174,17 @@ $role = $_SESSION['role'];
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <h1>Selamat Datang, <?php echo htmlspecialchars($username); ?>!</h1>
-    <a href="logout.php">Logout</a>
-
-    <?php if ($role == 'admin'): ?>
-        <h2>Halaman Beranda Admin</h2>
-        <a href="form.php">Formulir Pendaftaran</a><br>
-        <a href="data.php">Data Pendaftaran</a>
-    <?php else: ?>
-        <h2>Halaman Beranda Pengguna</h2>
-        <a href="form.php">Formulir Pendaftaran</a><br>
-        <a href="data.php">Data Pendaftaran Saya</a>
-    <?php endif; ?>
+    <div class="sidebar">
+        <ul>
+            <li><a href="form.php">Formulir Pendaftaran</a></li>
+            <li><a href="data.php">Data Pendaftaran</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>Selamat Datang di Halaman Beranda</h1>
+        <p>Konten utama Anda di sini.</p>
+    </div>
 </body>
 </html>
 
@@ -344,7 +343,7 @@ $user_id = $_SESSION['user_id']; // Pastikan user_id disimpan dalam sesi
 </html>
 
 
-File process_form.php
+File 'proses_form.php'
 
 <?php
 session_start();
@@ -354,31 +353,41 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-require 'config.php';
+require 'database.php';
 
 $username = $_SESSION['username'];
 $role = $_SESSION['role'];
 
-$name = $_POST['name'];
-$school_origin = $_POST['school_origin'];
-$place_of_birth = $_POST['place_of_birth'];
-$date_of_birth = $_POST['date_of_birth'];
-$gender = $_POST['gender'];
-$address = $_POST['address'];
-$phone_number = $_POST['phone_number'];
-$religion = $_POST['religion'];
-$email = $_POST['email'];
-$chosen_program = $_POST['chosen_program'];
+if (!isset($_SESSION['user_id'])) {
+    die("User  ID tidak ditemukan dalam sesi.");
+}
 
-$result = mysqli_query($conn, "INSERT INTO students (name, school_origin, place_of_birth, date_of_birth, gender, address, phone_number, religion, email, chosen_program) VALUES ('$name', '$school_origin', '$place_of_birth', '$date_of_birth', '$gender', '$address', '$phone_number', '$religion', '$email', '$chosen_program')");
+$user_id = $_SESSION['user_id'];
+$name = $_POST['nama_lengkap'];
+$school_origin = $_POST['asal_sekolah'];
+$place_of_birth = $_POST['tempat_lahir'];
+$date_of_birth = $_POST['tanggal_lahir'];
+$gender = $_POST['jk'];
+$address = $_POST['alamat'];
+$phone_number = $_POST['nomor_telepon'];
+$religion = $_POST['agama'];
+$email = $_POST['email'];
+$chosen_program = $_POST['program_studi'];
+
+// Pastikan semua kolom yang diperlukan ada dalam query
+$sql = "INSERT INTO form (user_id, nama_lengkap, asal_sekolah, tempat_lahir, tanggal_lahir, jk, alamat, nomor_telepon, agama, email, program_studi) VALUES ('$user_id', '$name', '$school_origin', '$place_of_birth', '$date_of_birth', '$gender', '$address', '$phone_number', '$religion', '$email', '$chosen_program')";
+
+$result = mysqli_query($conn, $sql);
+
 if ($result) {
     header('Location: data.php');
     exit();
 } else {
-    echo "Gagal mendaftar.";
+    echo "Error: " . mysqli_error($conn);
 }
-?>
 
+mysqli_close($conn);
+?>
 
 File logout.php
 
@@ -555,79 +564,3 @@ if ($result) {
     echo "Gagal mengedit data.";
 }
 ?>
-
-
-file styles.css
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-h1, h2 {
-    color: #333;
-}
-
-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="date"],
-select,
-textarea {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-button {
-    background-color: #5cb85c;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-}
-
-button:hover {
-    background-color: #4cae4c;
-}
-
-a {
-    color: #5cb85c;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-p {
-    color: red;
-    font-size: 0.9em;
-}
-
-
