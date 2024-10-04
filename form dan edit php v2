@@ -1,0 +1,162 @@
+File edit.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Data Pendaftaran</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="form.php">Formulir Pendaftaran</a></li>
+            <li><a href="data.php">Data Pendaftaran</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>Edit Data Pendaftaran</h1>
+        <form action="process_edit.php" method="post">
+            <label for="nama_lengkap">Nama Lengkap:</label>
+            <input type="text" id="nama_lengkap" name="nama_lengkap" value="Nama Saat Ini" required><br>
+
+            <label for="asal_sekolah">Asal Sekolah:</label>
+            <input type="text" id="asal_sekolah" name="asal_sekolah" value="Sekolah Saat Ini" required><br>
+
+            <!-- Tambahkan input lainnya sesuai kebutuhan -->
+
+            <input type="submit" value="Simpan Perubahan">
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+File form.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Pendaftaran</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="form.php">Formulir Pendaftaran</a></li>
+            <li><a href="data.php">Data Pendaftaran</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>Formulir Pendaftaran</h1>
+        <form action="process_form.php" method="post">
+            <label for="nama_lengkap">Nama Lengkap:</label>
+            <input type="text" id="nama_lengkap" name="nama_lengkap" required><br>
+
+            <label for="asal_sekolah">Asal Sekolah:</label>
+            <input type="text" id="asal_sekolah" name="asal_sekolah" required><br>
+
+            <!-- Tambahkan input lainnya sesuai kebutuhan -->
+
+            <input type="submit" value="Daftar">
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+File cssnya:
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #333;
+    color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+.sidebar ul li {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.sidebar ul li a:hover {
+    background-color: #575757;
+}
+
+.content {
+    margin-left: 200px; /* Same as the width of the sidebar */
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align items to the top */
+}
+
+h1 {
+    color: #333;
+    margin-bottom : 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+label {
+    margin-bottom: 10px;
+}
+
+input[type="text"], input[type="submit"] {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+input[type="submit"] {
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #575757;
+}
