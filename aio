@@ -261,6 +261,7 @@ require 'config.php';
 
 $username = $_SESSION['username'];
 $role = $_SESSION['role'];
+$user_id = $_SESSION['user_id']; // Pastikan user_id disimpan dalam sesi
 
 ?>
 
@@ -279,7 +280,7 @@ $role = $_SESSION['role'];
     <?php if ($role == 'admin'): ?>
         <h2>Daftar Semua Pendaftar</h2>
         <?php
-        $result = mysqli_query($conn, "SELECT * FROM students");
+        $result = mysqli_query($conn, "SELECT * FROM form");
         if (mysqli_num_rows($result) > 0) {
             echo "<table border='1'>
                     <tr>
@@ -294,22 +295,20 @@ $role = $_SESSION['role'];
                         <th>Email</th>
                         <th>Program Studi Pilihan</th>
                         <th>Status</th>
-                        <th>Aksi</th>
                     </tr>";
             while ($row = mysqli_fetch_assoc($result)) {
                 echo "<tr>
-                        <td>{$row['name']}</td>
-                        <td>{$row['school_origin']}</td>
-                        <td>{$row['place_of_birth']}</td>
-                        <td>{$row['date_of_birth']}</td>
-                        <td>{$row['gender']}</td>
-                        <td>{$row['address']}</td>
-                        <td>{$row['phone_number']}</td>
-                        <td>{$row['religion']}</td>
+                        <td>{$row['nama_lengkap']}</td>
+                        <td>{$row['asal_sekolah']}</td>
+                        <td>{$row['tempat_lahir']}</td>
+                        <td>{$row['tanggal_lahir']}</td>
+                        <td>{$row['jk']}</td>
+                        <td>{$row['alamat']}</td>
+                        <td>{$row['nomor_telepon']}</td>
+                        <td>{$row['agama']}</td>
                         <td>{$row['email']}</td>
-                        <td>{$row['chosen_program']}</td>
+                        <td>{$row['program_studi']}</td>
                         <td>{$row['status']}</td>
-                        <td><a href='edit.php?id={$row['id']}'>Edit</a> | <a href='delete.php?id={$row['id']}'>Hapus</a></td>
                     </tr>";
             }
             echo "</table>";
@@ -320,23 +319,24 @@ $role = $_SESSION['role'];
     <?php else: ?>
         <h2>Data Pendaftaran Saya</h2>
         <?php
-        $result = mysqli_query($conn, "SELECT * FROM students WHERE email = '$username'");
+        // Query untuk mengambil data pendaftaran pengguna yang sedang login
+        $result = mysqli_query($conn, "SELECT * FROM form WHERE user_id = '$user_id'");
         if (mysqli_num_rows($result) > 0) {
             while ($row = mysqli_fetch_assoc($result)) {
-                echo "Nama: {$row['name']}<br>
-                      Asal Sekolah: {$row['school_origin']}<br>
-                      Tempat Lahir: {$row['place_of_birth']}<br>
-                      Tanggal Lahir: {$row['date_of_birth']}<br>
-                      Jenis Kelamin: {$row['gender']}<br>
-                      Alamat: {$row['address']}<br>
-                      Nomor Telepon: {$row['phone_number']}<br>
-                      Agama: {$row['religion']}<br>
+                echo "Nama: {$row['nama_lengkap']}<br>
+                      Asal Sekolah: {$row['asal_sekolah']}<br>
+                      Tempat Lahir: {$row['tempat_lahir']}<br>
+                      Tanggal Lahir: {$row['tanggal_lahir']}<br>
+                      Jenis Kelamin: {$row['jk']}<br>
+                      Alamat: {$row['alamat']}<br>
+                      Nomor Telepon: {$row['nomor_telepon']}<br>
+                      Agama: {$row['agama']}<br>
                       Email: {$row['email']}<br>
-                      Program Studi Pilihan: {$row['chosen_program']}<br>
+                      Program Studi Pilihan: {$row['program_studi']}<br>
                       Status: {$row['status']}<br>";
             }
         } else {
-            echo "Tidak ada data pendaftar.";
+            echo "Tidak ada data pendaftaran Anda.";
         }
         ?>
     <?php endif; ?>
