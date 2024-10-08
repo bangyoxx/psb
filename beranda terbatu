@@ -1,0 +1,140 @@
+<?php 
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    header('Location: index.html');
+    exit();
+}
+
+require 'database.php';
+
+$username = $_SESSION['username'];
+$role = $_SESSION['role'];
+?>
+
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Halaman beranda Pendaftaran Siswa Baru (PPDB)">
+    <title>Beranda | Pendaftaran Siswa Baru</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link ke file CSS -->
+</head>
+
+<body>
+
+    <div class="menusamping">
+        <ul>
+            <li><a href="form.php">Formulir Pendaftaran</a></li>
+            <li><a href="data.php">Data Pendaftaran</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h2>Selamat Datang di Halaman Beranda PPDB, <?php echo htmlspecialchars($username); ?>!</h2>
+        <p>Konten utama Anda di sini.</p>
+        <br>
+        <br>
+        <p>Bantuan:</p>
+        <p>Klik Formulir Pendaftaran untuk Mendaftar.</p>
+        <p>Klik Data Pendaftaran untuk Melihat Detail Pendaftaran Anda.</p>
+        <p>Klik Logout untuk Keluar.</p>
+    </div>
+
+</body>
+
+</html>
+
+
+
+
+
+/* styles.css */
+
+/* Gaya dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.menusamping {
+    background-color: #4CAF50;
+    width: 250px;
+    height: 100vh;
+    padding-top: 20px;
+    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.menusamping ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.menusamping ul li {
+    margin-bottom: 15px;
+}
+
+.menusamping ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    padding: 10px;
+    display: block;
+    text-align: center;
+}
+
+.menusamping ul li a:hover {
+    background-color: #45a049;
+}
+
+.content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 250px;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+p {
+    color: #666;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .menusamping {
+        width: 200px;
+    }
+
+    .content {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .menusamping {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .content {
+        margin-left: 0;
+        padding: 10px;
+    }
+}
